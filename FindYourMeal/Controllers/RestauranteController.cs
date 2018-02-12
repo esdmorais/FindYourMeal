@@ -18,30 +18,18 @@ namespace FindYourMeal.Controllers
             restauranteRepository = new RestauranteRepository(configuration);
         }
 
-        public IActionResult Index()
+        public IActionResult Restaurantes()
         {
             return View(restauranteRepository.FindAll());
         }
 
-        public IActionResult Create()
+        public IActionResult NovoRestaurante()
         {
             return View();
         }
 
-        // POST: Restaurante/Create
-        [HttpPost]
-        public IActionResult Create(Restaurante restaurante)
-        {
-            if (ModelState.IsValid)
-            {
-                restauranteRepository.Add(restaurante);
-                return RedirectToAction("Index");
-            }
-            return View(restaurante);
-        }
-
-        // GET: /Restaurante/Edit/1
-        public IActionResult Edit(int? id)
+        // GET: /Restaurante/Editar/1
+        public IActionResult Editar(int? id)
         {
             if (id == null)
             {
@@ -52,30 +40,38 @@ namespace FindYourMeal.Controllers
             {
                 return NotFound();
             }
-            return View(restaurante);
+            return View("EditarRestaurante", restaurante);
         }
 
-        // POST: /Restaurante/Edit   
+        // POST: /Restaurante/Salvar   
         [HttpPost]
-        public IActionResult Edit(Restaurante restaurante)
+        public IActionResult Salvar(Restaurante restaurante)
         {
             if (ModelState.IsValid)
             {
-                restauranteRepository.Update(restaurante);
-                return RedirectToAction("Index");
+                if (restaurante.ID != 0)
+                {
+                    restauranteRepository.Update(restaurante);
+                }
+                else
+                {
+                    restauranteRepository.Add(restaurante);
+                }
+
+                return RedirectToAction("Restaurantes");
             }
             return View(restaurante);
         }
 
         // GET:/Restaurante/Delete/1
-        public IActionResult Delete(int? id)
+        public IActionResult Apagar(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
             restauranteRepository.Remove(id.Value);
-            return RedirectToAction("Index");
+            return RedirectToAction("Restaurantes");
         }
     }
 }
