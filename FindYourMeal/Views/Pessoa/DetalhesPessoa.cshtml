@@ -1,0 +1,45 @@
+﻿@model FindYourMeal.ViewModels.PessoaViewModel
+@{
+    ViewData["Title"] = "Detalhes da pessoa";
+}
+
+<h2>@ViewData["Title"]</h2>
+<form >
+    <div class="form-horizontal">
+        <div class="form-group">
+            <label asp-for="ID" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <input asp-for="ID" class="form-control" readonly />
+            </div>
+            <label asp-for="Nome" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <input asp-for="Nome" class="form-control" readonly />
+            </div>
+            <label asp-for="Telefone" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <input asp-for="Telefone" class="form-control" readonly />
+            </div>
+            <label asp-for="Preferencias" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <span asp-validation-for="Preferencias" class="text-danger" />
+                @foreach (var restaurante in Model.Preferencias)
+                {
+                    @if (restaurante.IsChecked)
+                    {
+                        @Html.Label(restaurante.Display)<br/>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Pessoas">Voltar para a lista de pessoas</a>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+}

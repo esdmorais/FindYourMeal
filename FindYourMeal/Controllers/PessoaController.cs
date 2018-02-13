@@ -30,9 +30,29 @@ namespace FindYourMeal.Controllers
         }
 
         // GET: Pessoa/Detalhes/5
-        public ActionResult Detalhes(int id)
+        public ActionResult Detalhes(int? id)
         {
-            return View();
+            if (id == null)
+            {
+                return NotFound();
+            }
+            Pessoa pessoa = pessoaRepository.FindByID(id.Value);
+            if (pessoa == null)
+            {
+                return NotFound();
+            }
+            var pessoaViewModel = new PessoaViewModel()
+            {
+                ID = pessoa.ID,
+                Nome = pessoa.Nome,
+                Telefone = pessoa.Telefone
+            };
+            PreencherListaRestaurantesDisponiveis(pessoaViewModel);
+            foreach (var restaurantes in pessoa.Preferencias)
+            {
+                pessoaViewModel.Preferencias.Find(m => m.ID == restaurantes.ID).IsChecked = true;
+            }
+            return View("DetalhesPessoa", pessoaViewModel);
         }
 
         // GET: Pessoa/AdicionarPessoa
@@ -134,7 +154,7 @@ namespace FindYourMeal.Controllers
             return View("EditarPessoa", pessoaViewModel);
         }
 
-        // POST: Pessoa/Apagar/5
+        // GET: Pessoa/Apagar/5
         public ActionResult Apagar(int? id)
         {
             try

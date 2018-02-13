@@ -33,7 +33,7 @@ namespace FindYourMeal.Repositories
             using (IDbConnection dbConnection = Connection)
             {
                 dbConnection.Open();
-                dbConnection.Execute("INSERT INTO Pessoa (Nome) VALUES (@Nome)", pessoa);
+                dbConnection.Execute("INSERT INTO Pessoa (Nome, Telefone) VALUES (@Nome, @Telefone)", pessoa);
                 dbConnection.Close();
 
                 dbConnection.Open();
@@ -58,7 +58,7 @@ namespace FindYourMeal.Repositories
                 IEnumerable<Pessoa> retorno;
 
                 dbConnection.Open();
-                retorno = dbConnection.Query<Pessoa>("SELECT ID, Nome FROM Pessoa ORDER BY Nome");
+                retorno = dbConnection.Query<Pessoa>("SELECT ID, Nome, Telefone FROM Pessoa ORDER BY Nome");
                 dbConnection.Close();
 
                 return retorno;
@@ -71,7 +71,7 @@ namespace FindYourMeal.Repositories
             {
                 Pessoa pessoa;
                 dbConnection.Open();
-                pessoa = dbConnection.Query<Pessoa>("SELECT ID, Nome FROM Pessoa WHERE ID = @Id", new { Id = id }).FirstOrDefault();
+                pessoa = dbConnection.Query<Pessoa>("SELECT ID, Nome, Telefone FROM Pessoa WHERE ID = @Id", new { Id = id }).FirstOrDefault();
 
                 pessoa.Preferencias = dbConnection.Query<Restaurante>(
                     " SELECT Restaurante.ID, Restaurante.Nome " +
