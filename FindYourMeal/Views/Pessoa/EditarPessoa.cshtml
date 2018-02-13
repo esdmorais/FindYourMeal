@@ -1,0 +1,49 @@
+﻿@model FindYourMeal.ViewModels.PessoaViewModel
+@{
+    ViewData["Title"] = "Editar pessoa";
+}
+
+<h2>@ViewData["Title"]</h2>
+<form asp-action="Salvar">
+    <div class="form-horizontal">
+        <h4>Informações do restaurante:</h4>
+        <hr />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="ID" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <input asp-for="ID" class="form-control" readonly />
+            </div>
+            <label asp-for="Nome" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <input asp-for="Nome" class="form-control" />
+                <span asp-validation-for="Nome" class="text-danger" />
+            </div>
+            <label asp-for="Telefone" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <input asp-for="Telefone" class="form-control" />
+                <span asp-validation-for="Telefone" class="text-danger" />
+            </div>
+            <label asp-for="Preferencias" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                @Html.EditorFor(x => x.Preferencias)
+                <span asp-validation-for="Preferencias" class="text-danger" />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Salvar" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Pessoas">Voltar para a lista de pessoas</a>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+}

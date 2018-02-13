@@ -1,0 +1,46 @@
+﻿@model IEnumerable<FindYourMeal.Models.Pessoa>
+@{
+    ViewData["Title"] = "Pessoas";
+}
+
+<h2>@ViewData["Title"]</h2>
+<p>
+    <a asp-action="AdicionarPessoa">Adicionar pessoa</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Nome)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Telefone)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nome)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Telefone)
+            </td>
+            <td>
+                @Html.ActionLink("Editar", "Editar", new { ID = item.ID }) |
+                @Html.ActionLink("Detalhes", "Detalhes", new { ID = item.ID }) |
+                @Html.ActionLink("Apagar", "Apagar", new { id = item.ID }
+                                                   , new { onclick = "return confirm('Tem certeza que deseja apagar?');" })
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
