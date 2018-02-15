@@ -33,19 +33,27 @@ namespace FindYourMeal.Repositories
             using (IDbConnection dbConnection = Connection)
             {
                 dbConnection.Open();
-                dbConnection.Execute("INSERT INTO Pessoa (Nome, Telefone) VALUES (@Nome, @Telefone)", pessoa);
-                dbConnection.Close();
+                IDbTransaction transacao = dbConnection.BeginTransaction();
 
-                dbConnection.Open();
-                dbConnection.Execute("DELETE FROM Preferencias WHERE PessoaID = @PessoaID", new { PessoaID = pessoa.ID });
-                dbConnection.Close();
-
-                string sqlInsert = "INSERT INTO Preferencias (PessoaID, RestauranteID) values (@PessoaID, @RestauranteID)";
-
-                foreach (var restaurante in pessoa.Preferencias)
+                try
                 {
-                    dbConnection.Open();
-                    dbConnection.Execute(sqlInsert, new { PessoaID = pessoa.ID, RestauranteID = restaurante.ID });
+                    pessoa.ID = Convert.ToInt32(dbConnection.ExecuteScalar("INSERT INTO Pessoa (Nome, Telefone) VALUES (@Nome, @Telefone) RETURNING ID ", pessoa));
+
+                    string restaurantesIDs = string.Join(",", pessoa.Preferencias.Select(a => a.ID).ToArray());
+
+                    dbConnection.Execute(@"INSERT INTO Preferencias (PessoaID, RestauranteID) 
+                                              SELECT @PessoaID, ID 
+                                                FROM Restaurante 
+                                               WHERE ID IN (" + restaurantesIDs + ")", new { PessoaID = pessoa.ID, IDs = pessoa.Preferencias.Select(a => a.ID).ToArray() });
+                    transacao.Commit();
+                }
+                catch (Exception e)
+                {
+                    transacao.Rollback();
+                    throw new Exception("Erro ao adicionar uma pessoa.", e);
+                }
+                finally
+                {                    
                     dbConnection.Close();
                 }
             }

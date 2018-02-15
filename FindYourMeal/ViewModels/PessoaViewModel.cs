@@ -16,7 +16,7 @@ namespace FindYourMeal.ViewModels
         }
 
         [Key]
-        public long ID { get; set; }
+        public int ID { get; set; }
 
         [Required(ErrorMessage = "Nome obrigatório.")]
         [StringLength(50, ErrorMessage = "O nome deve conter no máximo 50 caracteres.")]

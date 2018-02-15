@@ -59,6 +59,32 @@ namespace FindYourMeal.Repositories
             {
                 dbConnection.Open();
                 dbConnection.Execute("DELETE FROM Restaurante WHERE Id = @Id", new { Id = id });
+                dbConnection.Close();
+            }
+        }
+
+        public List<Restaurante> FindOpcoesDasPessoas(List<Pessoa> pessoas)
+        {
+            using (IDbConnection dbConnection = Connection)
+            {
+                List<Restaurante> restaurantes;
+                string pessoasIDs = string.Join(",", pessoas.Select(a => a.ID).ToArray());
+
+                dbConnection.Open();
+
+                restaurantes = dbConnection.Query<Restaurante>(@"
+                      SELECT Restaurante.ID, Restaurante.Nome
+                        FROM Restaurante
+                        JOIN Preferencias
+                          ON Preferencias.RestauranteID = Restaurante.ID
+                       WHERE Preferencias.PessoaID IN (" + pessoasIDs + @")
+                       GROUP BY Restaurante.ID, Restaurante.Nome
+                      HAVING COUNT(Preferencias.RestauranteID)  = (SELECT COUNT(ID) Qtd 
+                                                                     FROM Pessoa 
+                                                                    WHERE ID IN (" + pessoasIDs + "))").AsList<Restaurante>();
+                dbConnection.Close();
+
+                return restaurantes;
             }
         }
 
@@ -68,6 +94,7 @@ namespace FindYourMeal.Repositories
             {
                 dbConnection.Open();
                 dbConnection.Query("UPDATE Restaurante SET Nome = @Nome WHERE Id = @Id", restaurante);
+                dbConnection.Close();
             }
         }
     }
