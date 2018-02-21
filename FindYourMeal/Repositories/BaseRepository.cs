@@ -1,21 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using FindYourMeal.Models;
+using Microsoft.Extensions.Configuration;
+using Npgsql;
 
 namespace FindYourMeal.Repositories
 {
-    public interface BaseRepository<T> where T : BaseEntity
+    public abstract class BaseRepository<T> where T : BaseEntity
     {
-        void Add(T item);
+        private string connectionString;
 
-        void Remove(int id);
+        public BaseRepository(IConfiguration configuration)
+        {
+            connectionString = configuration.GetValue<string>("DBInfo:ConnectionString");
+        }
 
-        void Update(T item);
+        protected IDbConnection Connection
+        {
+            get
+            {
+                return new NpgsqlConnection(connectionString);
+            }
+        }
 
-        T FindByID(int id);
+        public abstract void Add(T item);
 
-        IEnumerable<T> FindAll();
+        public abstract void Remove(int id);
+
+        public abstract void Update(T item);
+
+        public abstract T FindByID(int id);
+
+        public abstract IEnumerable<T> FindAll();
     }
 }

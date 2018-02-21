@@ -12,48 +12,49 @@ namespace FindYourMeal.Repositories
 {
     public class RestauranteRepository : BaseRepository<Restaurante>
     {
-        private string connectionString;
-        public RestauranteRepository(IConfiguration configuration)
+        public RestauranteRepository(IConfiguration configuration) : base(configuration)
         {
-            connectionString = configuration.GetValue<string>("DBInfo:ConnectionString");
         }
 
-        internal IDbConnection Connection
-        {
-            get
-            {
-                return new NpgsqlConnection(connectionString);
-            }
-        }
-
-        public void Add(Restaurante restaurante)
+        public override void Add(Restaurante restaurante)
         {
             using (IDbConnection dbConnection = Connection)
             {
                 dbConnection.Open();
                 dbConnection.Execute("INSERT INTO Restaurante (Nome) VALUES (@Nome)", restaurante);
+                dbConnection.Close();
             }
         }
 
-        public IEnumerable<Restaurante> FindAll()
+        public override IEnumerable<Restaurante> FindAll()
         {
             using (IDbConnection dbConnection = Connection)
             {
+                IEnumerable<Restaurante> retorno;
+
                 dbConnection.Open();
-                return dbConnection.Query<Restaurante>("SELECT ID, Nome FROM Restaurante ORDER BY Nome");
+                retorno = dbConnection.Query<Restaurante>("SELECT ID, Nome FROM Restaurante ORDER BY Nome");
+                dbConnection.Close();
+
+                return retorno;
             }
         }
 
-        public Restaurante FindByID(int id)
+        public override Restaurante FindByID(int id)
         {
             using (IDbConnection dbConnection = Connection)
             {
+                Restaurante retorno;
+
                 dbConnection.Open();
-                return dbConnection.Query<Restaurante>("SELECT ID, Nome FROM Restaurante WHERE ID = @Id", new { Id = id }).FirstOrDefault();
+                retorno = dbConnection.Query<Restaurante>("SELECT ID, Nome FROM Restaurante WHERE ID = @Id", new { Id = id }).FirstOrDefault();
+                dbConnection.Close();
+
+                return retorno;
             }
         }
 
-        public void Remove(int id)
+        public override void Remove(int id)
         {
             using (IDbConnection dbConnection = Connection)
             {
@@ -88,7 +89,7 @@ namespace FindYourMeal.Repositories
             }
         }
 
-        public void Update(Restaurante restaurante)
+        public override void Update(Restaurante restaurante)
         {
             using (IDbConnection dbConnection = Connection)
             {

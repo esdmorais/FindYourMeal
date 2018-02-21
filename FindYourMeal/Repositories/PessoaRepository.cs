@@ -14,21 +14,11 @@ namespace FindYourMeal.Repositories
 {
     public class PessoaRepository : BaseRepository<Pessoa>
     {
-        private string connectionString;
-        public PessoaRepository(IConfiguration configuration)
+        public PessoaRepository(IConfiguration configuration) : base(configuration)
         {
-            connectionString = configuration.GetValue<string>("DBInfo:ConnectionString");
         }
 
-        internal IDbConnection Connection
-        {
-            get
-            {
-                return new NpgsqlConnection(connectionString);
-            }
-        }
-
-        public void Add(Pessoa pessoa)
+        public override void Add(Pessoa pessoa)
         {
             using (IDbConnection dbConnection = Connection)
             {
@@ -59,7 +49,7 @@ namespace FindYourMeal.Repositories
             }
         }
 
-        public IEnumerable<Pessoa> FindAll()
+        public override IEnumerable<Pessoa> FindAll()
         {
             using (IDbConnection dbConnection = Connection)
             {
@@ -73,7 +63,7 @@ namespace FindYourMeal.Repositories
             }
         }
 
-        public Pessoa FindByID(int id)
+        public override Pessoa FindByID(int id)
         {
             using (IDbConnection dbConnection = Connection)
             {
@@ -93,7 +83,7 @@ namespace FindYourMeal.Repositories
             }
         }
 
-        public void Remove(int id)
+        public override void Remove(int id)
         {
             using (IDbConnection dbConnection = Connection)
             {
@@ -103,24 +93,34 @@ namespace FindYourMeal.Repositories
             }
         }
 
-        public void Update(Pessoa pessoa)
+        public override void Update(Pessoa pessoa)
         {
             using (IDbConnection dbConnection = Connection)
             {
                 dbConnection.Open();
-                dbConnection.Query("UPDATE Pessoa SET Nome = @Nome WHERE Id = @ID", pessoa);
-                dbConnection.Close();
+                IDbTransaction transacao = dbConnection.BeginTransaction();
 
-                dbConnection.Open();
-                dbConnection.Execute("DELETE FROM Preferencias WHERE PessoaID = @PessoaID", new { PessoaID = pessoa.ID });
-                dbConnection.Close();
-
-                string sqlInsert = "INSERT INTO Preferencias (PessoaID, RestauranteID) values (@PessoaID, @RestauranteID)";
-
-                foreach (var restaurante in pessoa.Preferencias)
+                try
                 {
-                    dbConnection.Open();
-                    dbConnection.Execute(sqlInsert, new { PessoaID = pessoa.ID, RestauranteID = restaurante.ID });
+                    dbConnection.Query("UPDATE Pessoa SET Nome = @Nome, Telefone = @Telefone WHERE Id = @ID", pessoa);
+
+                    dbConnection.Execute("DELETE FROM Preferencias WHERE PessoaID = @PessoaID", new { PessoaID = pessoa.ID });
+
+                    foreach (var restaurante in pessoa.Preferencias)
+                    {
+                        dbConnection.Execute("INSERT INTO Preferencias (PessoaID, RestauranteID) VALUES (@PessoaID, @RestauranteID)"
+                            , new { PessoaID = pessoa.ID, RestauranteID = restaurante.ID });
+                    }
+
+                    transacao.Commit();
+                }
+                catch (Exception e)
+                {
+                    transacao.Rollback();
+                    throw new Exception("Erro ao alterar uma pessoa.", e);
+                }
+                finally
+                {
                     dbConnection.Close();
                 }
             }
